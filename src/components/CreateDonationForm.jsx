@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const CreateDonationForm = ({ token, showToast, onComplete, initialData = {} }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -11,7 +11,7 @@ export const CreateDonationForm = ({ token, showToast, onComplete, initialData =
   const [formData, setFormData] = useState({
     donor_name: initialData.donor_name || '',
     age: initialData.age || '',
-    blood_group: initialData.blood_group || '',
+    od_group: initialData.blood_group || '',
     organ: initialData.organ || '',
     contact: initialData.contact || '',
     city: initialData.city || '',
