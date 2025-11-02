@@ -1,8 +1,7 @@
-// src/pages/DonationsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Filter, X, Search, Heart, Loader2, HandHeart } from 'lucide-react';
-import { CreateDonationForm } from '../components/CreateDonationForm'; // <-- 1. IMPORT
+import { CreateDonationForm } from '../components/CreateDonationForm'; // <-- Still imported
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,15 +10,11 @@ export const DonationsPage = ({ showToast }) => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ city: '', blood_group: '', organ: '' });
-  const { token, user } = useAuth(); // <-- Get the user
+  const { token, user } = useAuth();
 
   const fetchDonations = async () => {
-    // ... (This function is the same as before) ...
     setLoading(true);
-    const params = new URLSearchParams();
-    if (filters.city) params.append('city', filters.city);
-    if (filters.blood_group) params.append('blood_group', filters.blood_group);
-    if (filters.organ) params.append('organ', filters.organ);
+    const params = new URLSearchParams(filters);
     try {
       const res = await fetch(`${API_BASE_URL}/donations?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -35,24 +30,24 @@ export const DonationsPage = ({ showToast }) => {
   };
 
   useEffect(() => { if (token) fetchDonations(); }, [token]);
+
   const handleFilterChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
   const handleFilterSubmit = () => fetchDonations();
 
-  // --- 2. NEW "ACCEPT" FUNCTION ---
+  // This function is for a REQUESTER manually accepting a donation from the list.
+  // It is CORRECT.
   const handleAcceptDonation = async (donationId) => {
-    if (!window.confirm('Are you sure you want to accept this donation? This will notify the donor.')) {
+    if (!window.confirm('Are you sure you want to accept this donation?')) {
       return;
     }
-
     try {
       const res = await fetch(`${API_BASE_URL}/donations/${donationId}/accept`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
       const data = await res.json();
       if (res.ok) {
-        showToast('Donation accepted! Check your dashboard for details.', 'success');
+        showToast('Donation accepted! Check your dashboard.', 'success');
         fetchDonations(); // Refresh the list
       } else {
         showToast(data.message || 'Failed to accept donation', 'error');
@@ -64,7 +59,7 @@ export const DonationsPage = ({ showToast }) => {
 
   return (
     <div className="space-y-6">
-      {/* --- HEADER --- */}
+      {/* --- HEADER (Unchanged) --- */}
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-gray-800">Available Donations</h2>
         <button
@@ -76,7 +71,7 @@ export const DonationsPage = ({ showToast }) => {
         </button>
       </div>
 
-      {/* --- 3. USE THE NEW COMPONENT --- */}
+      {/* --- This now renders our "smart" form --- */}
       {showForm && (
         <CreateDonationForm
           token={token}
@@ -88,9 +83,9 @@ export const DonationsPage = ({ showToast }) => {
         />
       )}
 
-      {/* --- FILTER BAR (same) --- */}
+      {/* --- FILTER BAR (Unchanged) --- */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        {/* ... (filter logic is the same) ... */}
+        {/* ... (filter JSX) ... */}
         <div className="flex items-center gap-2 mb-4"> <Filter size={20} className="text-gray-600" /> <h3 className="text-lg font-semibold text-gray-800">Filter Donations</h3> </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <input name="city" type="text" placeholder="City" value={filters.city} onChange={handleFilterChange} className="px-4 py-2 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none" />
@@ -100,29 +95,19 @@ export const DonationsPage = ({ showToast }) => {
         </div>
       </div>
 
-      {/* --- DONATION LIST --- */}
+      {/* --- DONATION LIST (Unchanged) --- */}
       {loading ? (
         <div className="text-center py-12"> <Loader2 className="inline-block animate-spin text-teal-600" size={48} /> </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {donations.map((donation) => (
             <div key={donation.id} className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 border border-gray-200 flex flex-col justify-between">
-              {/* Card content (same) */}
               <div>
-                <div className="flex items-start justify-between mb-4">
-                  <div> <h3 className="text-xl font-bold text-teal-600">{donation.organ}</h3> <p className="text-sm text-gray-500">Blood: {donation.blood_group}</p> </div>
-                  <div className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-sm font-medium"> Available </div>
-                </div>
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <p><span className="font-medium">Donor:</span> {donation.donor_name}</p>
-                  <p><span className="font-medium">Age:</span> {donation.age}</p>
-                  <p><span className="font-medium">City:</span> {donation.city}</p>
-                  <p><span className="font-medium">Contact:</span> {donation.contact}</p>
-                  <p><span className="font-medium">Date:</span> {new Date(donation.availability_date).toLocaleDateString()}</p>
-                </div>
+                {/* ... (card content) ... */}
+                <div className="flex items-start justify-between mb-4"> <div> <h3 className="text-xl font-bold text-teal-600">{donation.organ}</h3> <p className="text-sm text-gray-500">Blood: {donation.blood_group}</p> </div> <div className="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-sm font-medium"> Available </div> </div> <div className="space-y-2 text-sm text-gray-600 mb-4"> <p><span className="font-medium">Donor:</span> {donation.donor_name}</p> <p><span className="font-medium">Age:</span> {donation.age}</p> <p><span className="font-medium">City:</span> {donation.city}</p> <p><span className="font-medium">Contact:</span> {donation.contact}</p> <p><span className="font-medium">Date:</span> {new Date(donation.availability_date).toLocaleDateString()}</p> </div>
               </div>
 
-              {/* --- 4. NEW "ACCEPT" BUTTON --- */}
+              {/* This "Accept" button is correct */}
               {user?.id !== donation.user_id && (
                 <button
                   onClick={() => handleAcceptDonation(donation.id)}
@@ -138,7 +123,6 @@ export const DonationsPage = ({ showToast }) => {
             <div className="col-span-full text-center py-12 text-gray-500">
               <Heart size={48} className="mx-auto mb-4" />
               <h3 className="text-xl font-semibold">No donations found.</h3>
-              <p>Try adjusting your filters or be the first to create one!</p>
             </div>
           )}
         </div>
