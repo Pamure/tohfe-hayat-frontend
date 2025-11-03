@@ -25,18 +25,18 @@ export const CreateDonationForm = ({ token, showToast, onComplete, initialData =
   // --- THIS useEffect IS NOW FIXED ---
   // It ONLY runs if the initialData prop *itself* changes
   // (e.g., you close a "Fulfill" form and open a new one).
-  // It will NOT run on every keystroke anymore.
-  useEffect(() => {
-    setFormData({
-      donor_name: initialData.donor_name || '',
-      age: initialData.age || '',
-      blood_group: initialData.blood_group || '',
-      organ: initialData.organ || '',
-      contact: initialData.contact || '',
-      city: initialData.city || '',
-      availability_date: initialData.availability_date || ''
-    });
-  }, [initialData]); // The dependency array is correct. My original bug was in useState.
+  // It will NOT run on every // keystroke anymore.
+  // useEffect(() => {
+  //   setFormData({
+  //     donor_name: initialData.donor_name || '',
+  //     age: initialData.age || '',
+  //     blood_group: initialData.blood_group || '',
+  //     organ: initialData.organ || '',
+  //     contact: initialData.contact || '',
+  //     city: initialData.city || '',
+  //     availability_date: initialData.availability_date || ''
+  //   });
+  // }, [initialData]); // The dependency array is correct. My original bug was in useState.
 
   // --- (The rest of your code is correct) ---
 
@@ -68,7 +68,7 @@ export const CreateDonationForm = ({ token, showToast, onComplete, initialData =
         await handleCreateNewDonation();
       }
     } catch (error) {
-      showToast('Error checking matches. Creating new donation anyway.', 'error');
+      showToast('Error checking matches. Creating new donation anyway.', error);
       await handleCreateNewDonation();
     } finally {
       setIsChecking(false);
@@ -91,7 +91,7 @@ export const CreateDonationForm = ({ token, showToast, onComplete, initialData =
         showToast(data.message || 'Failed to create donation', 'error');
       }
     } catch (error) {
-      showToast('Network error while creating donation', 'error');
+      showToast('Network error while creating donation', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -113,7 +113,7 @@ export const CreateDonationForm = ({ token, showToast, onComplete, initialData =
         showToast(data.message || 'Failed to fulfill request', 'error');
       }
     } catch (error) {
-      showToast('Network error while fulfilling request', 'error');
+      showToast('Network error while fulfilling request', error);
     } finally {
       setIsSubmitting(false);
     }
